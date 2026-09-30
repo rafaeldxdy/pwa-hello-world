@@ -3,220 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Todoist PWA</title>
+    <title>Todoist Clone</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#dc2626">
+    <meta name="theme-color" content="#db4c3f">
     <style>
         :root {
-            --primary: #dc2626;
-            --primary-hover: #b91c1c;
-            --bg: #f9fafb;
-            --card-bg: #ffffff;
-            --text: #1f2937;
-            --text-light: #9ca3af;
-            --border: #e5e7eb;
+            --todoist-red: #db4c3f;
+            --todoist-red-hover: #c53727;
+            --bg-main: #ffffff;
+            --bg-sidebar: #fafaf9;
+            --text-main: #202020;
+            --text-secondary: #666666;
+            --border-color: #f0f0f0;
+            --hover-bg: #eeeeee;
+            --p1: #d1453b;
+            --p2: #eb8909;
+            --p3: #2488ff;
+            --p4: #808080;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: var(--bg);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: var(--text);
+            color: var(--text-main);
+            background-color: var(--bg-main);
             display: flex;
-            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            min-height: 100vh;
-            background-color: var(--card-bg);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        /* Sidebar */
+        aside {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 10;
         }
 
-        header {
-            padding: 20px;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border);
+        .sidebar-header {
+            padding: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
         }
 
-        h1 {
+        .nav-list {
+            list-style: none;
+            padding: 0 8px;
             margin: 0;
-            font-size: 1.5rem;
-            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .task-input-container {
-            padding: 16px 20px;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            display: flex;
             gap: 10px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary);
-        }
-
-        button.add-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1rem;
+            padding: 8px 12px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            transition: background 0.15s;
         }
 
-        button.add-btn:hover {
-            background-color: var(--primary-hover);
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--hover-bg);
         }
 
-        .task-list {
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--text-secondary);
+        }
+
+        .nav-item.active svg {
+            fill: var(--todoist-red);
+        }
+
+        /* Main Content */
+        main {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: var(--bg-main);
             overflow-y: auto;
-            padding: 20px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            padding: 16px 32px;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: none;
+            padding: 4px;
+        }
+
+        .content-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 20px;
+            flex: 1;
+        }
+
+        h1.view-title {
+            font-size: 1.5rem;
+            margin: 0 0 24px 0;
+            font-weight: 700;
+        }
+
+        /* Task List */
+        .task-list {
             list-style: none;
-            margin: 0;
+            padding: 0;
+            margin: 0 0 16px 0;
         }
 
         .task-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            padding: 12px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            transition: transform 0.1s;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+            animation: fadeIn 0.2s ease;
         }
 
-        .task-item.completed span {
-            text-decoration: line-through;
-            color: var(--text-light);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .task-left {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
             flex: 1;
+        }
+
+        .checkbox-custom {
+            margin-top: 3px;
+            min-width: 18px;
+            min-height: 18px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .task-item.completed .checkbox-custom {
+            background-color: var(--text-secondary);
+            border-color: var(--text-secondary);
+        }
+
+        .task-item.completed .checkbox-custom::after {
+            content: "✓";
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-text {
+            font-size: 0.95rem;
+            line-height: 1.4;
             word-break: break-word;
         }
 
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--primary);
-            cursor: pointer;
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-secondary);
         }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .priority-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .p1 { background-color: var(--p1); }
+        .p2 { background-color: var(--p2); }
+        .p3 { background-color: var(--p3); }
+        .p4 { display: none; }
 
         .delete-btn {
             background: none;
             border: none;
-            color: var(--text-light);
+            color: var(--text-secondary);
             cursor: pointer;
-            font-size: 1.2rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: color 0.2s, background-color 0.2s;
+            font-size: 1.1rem;
+            opacity: 0;
+            transition: opacity 0.15s, color 0.15s;
+            padding: 0 4px;
+        }
+
+        .task-item:hover .delete-btn {
+            opacity: 1;
         }
 
         .delete-btn:hover {
-            color: var(--primary);
-            background-color: #fee2e2;
+            color: var(--todoist-red);
+        }
+
+        /* Add Task Form / Button */
+        .add-task-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 8px 0;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+
+        .add-task-trigger:hover {
+            color: var(--todoist-red);
+        }
+
+        .add-task-trigger svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--todoist-red);
+        }
+
+        .task-form {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+            background: var(--bg-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+        .task-form.active {
+            display: block;
+        }
+
+        .task-form input[type="text"] {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 0.95rem;
+            padding: 4px 0;
+            margin-bottom: 12px;
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+        }
+
+        .form-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        select.priority-select {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-main);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        button.btn-cancel {
+            background-color: var(--hover-bg);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        button.btn-submit {
+            background-color: var(--todoist-red);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+        }
+
+        button.btn-submit:hover {
+            background-color: var(--todoist-red-hover);
         }
 
         .empty-state {
             text-align: center;
-            color: var(--text-light);
-            margin-top: 40px;
-            font-size: 0.95rem;
+            color: var(--text-secondary);
+            padding: 40px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsividade Mobile */
+        @media (max-width: 768px) {
+            aside {
+                position: fixed;
+                height: 100%;
+                left: -260px;
+            }
+            aside.open {
+                left: 0;
+            }
+            .menu-toggle {
+                display: block;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>✓ Tarefas</h1>
-        </header>
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <span>Menu</span>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active" onclick="switchView('inbox')">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-8h-4V9h4v2z"/></svg>
+                Entrada
+            </li>
+            <li class="nav-item" onclick="switchView('today')">
+                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                Hoje
+            </li>
+        </ul>
+    </aside>
 
-        <div class="task-input-container">
-            <input type="text" id="taskInput" placeholder="Adicionar tarefa (ex: Estudar T-SQL)..." autocomplete="off">
-            <button class="add-btn" id="addBtn">Adicionar</button>
+    <main>
+        <div class="topbar">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#202020"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            </button>
         </div>
 
-        <ul class="task-list" id="taskList">
-            <!-- As tarefas aparecem aqui dinamicamente -->
-        </ul>
-    </div>
+        <div class="content-container">
+            <h1 class="view-title" id="viewTitle">Entrada</h1>
+
+            <ul class="task-list" id="taskList">
+                <!-- Tarefas entram aqui -->
+            </ul>
+
+            <button class="add-task-trigger" id="addTaskTrigger" onclick="openForm()">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Adicionar tarefa
+            </button>
+
+            <div class="task-form" id="taskForm">
+                <input type="text" id="taskInput" placeholder="Nome da tarefa (ex: Estudar T-SQL)" autocomplete="off">
+                <div class="form-actions">
+                    <div class="form-options">
+                        <select class="priority-select" id="taskPriority">
+                            <option value="4">Prioridade 4</option>
+                            <option value="3">Prioridade 3</option>
+                            <option value="2">Prioridade 2</option>
+                            <option value="1">Prioridade 1</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button class="btn-cancel" onclick="closeForm()">Cancelar</button>
+                        <button class="btn-submit" onclick="addTask()">Adicionar tarefa</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const taskInput = document.getElementById('taskInput');
-        const addBtn = document.getElementById('addBtn');
-        const taskList = document.getElementById('taskList');
+        let currentView = 'inbox';
+        let tasks = JSON.parse(localStorage.getItem('todoist_pwa_tasks')) || [];
 
-        // Carrega as tarefas salvas no celular/navegador
-        let tasks = JSON.parse(localStorage.getItem('pwa_tasks')) || [];
+        const taskList = document.getElementById('taskList');
+        const taskInput = document.getElementById('taskInput');
+        const taskPriority = document.getElementById('taskPriority');
+        const taskForm = document.getElementById('taskForm');
+        const addTaskTrigger = document.getElementById('addTaskTrigger');
+        const viewTitle = document.getElementById('viewTitle');
 
         function saveTasks() {
-            localStorage.setItem('pwa_tasks', JSON.stringify(tasks));
+            localStorage.setItem('todoist_pwa_tasks', JSON.stringify(tasks));
         }
 
         function renderTasks() {
             taskList.innerHTML = '';
-            
-            if (tasks.length === 0) {
-                taskList.innerHTML = '<li class="empty-state">Nenhuma tarefa por aqui. Aproveite o dia! 🎉</li>';
+
+            let filteredTasks = tasks;
+            if (currentView === 'today') {
+                const todayStr = new Date().toISOString().split('T')[0];
+                filteredTasks = tasks.filter(t => t.date === todayStr);
+            }
+
+            if (filteredTasks.length === 0) {
+                taskList.innerHTML = `<li class="empty-state">Tudo limpo por aqui! Aproveite o seu dia. ✨</li>`;
                 return;
             }
 
-            tasks.forEach((task, index) => {
+            filteredTasks.forEach((task, index) => {
+                const realIndex = tasks.indexOf(task);
                 const li = document.createElement('li');
                 li.className = `task-item ${task.completed ? 'completed' : ''}`;
                 
                 li.innerHTML = `
                     <div class="task-left">
-                        <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${index})">
-                        <span>${escapeHtml(task.text)}</span>
+                        <div class="checkbox-custom" onclick="toggleTask(${realIndex})"></div>
+                        <div class="task-content">
+                            <div class="task-text">${escapeHtml(task.text)}</div>
+                            <div class="task-meta">
+                                <span class="priority-indicator p${task.priority}"></span>
+                                <span>${task.date ? formatDate(task.date) : ''}</span>
+                            </div>
+                        </div>
                     </div>
-                    <button class="delete-btn" onclick="deleteTask(${index})" title="Excluir">×</button>
+                    <button class="delete-btn" onclick="deleteTask(${realIndex})" title="Excluir">🗑️</button>
                 `;
                 taskList.appendChild(li);
             });
+        }
+
+        function openForm() {
+            taskForm.classList.add('active');
+            addTaskTrigger.style.display = 'none';
+            taskInput.focus();
+        }
+
+        function closeForm() {
+            taskForm.classList.remove('active');
+            addTaskTrigger.style.display = 'flex';
+            taskInput.value = '';
         }
 
         function addTask() {
             const text = taskInput.value.trim();
             if (text === '') return;
 
-            tasks.push({ text: text, completed: false });
-            taskInput.value = '';
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            tasks.push({
+                text: text,
+                completed: false,
+                priority: taskPriority.value,
+                date: todayStr // Atribui a data de hoje para aparecer na aba "Hoje" também
+            });
+
             saveTasks();
             renderTasks();
+            closeForm();
         }
 
         window.toggleTask = function(index) {
@@ -227,27 +513,48 @@
 
         window.deleteTask = function(index) {
             tasks.splice(index, 1);
+            saveTask(); // corrigido para saveTasks abaixo
             saveTasks();
             renderTasks();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (view === 'inbox') {
+                viewTitle.innerText = 'Entrada';
+            } else if (view === 'today') {
+                viewTitle.innerText = 'Hoje';
+            }
+            renderTasks();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function formatDate(dateStr) {
+            const parts = dateStr.split('-');
+            return `${parts[2]}/${parts[1]}`;
         }
 
         function escapeHtml(text) {
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        addBtn.addEventListener('click', addTask);
         taskInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addTask();
         });
 
-        // Renderiza na inicialização
         renderTasks();
 
-        // Registra o Service Worker
+        // Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
-                .then(() => console.log("Service Worker registrado com sucesso!"))
-                .catch((err) => console.log("Erro ao registrar Service Worker:", err));
+                .then(() => console.log("Service Worker registrado!"))
+                .catch((err) => console.log("Erro:", err));
         }
     </script>
 </body>
